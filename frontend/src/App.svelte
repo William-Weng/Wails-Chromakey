@@ -1,14 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { Events } from "@wailsio/runtime";
+
   import { dialog } from "./utility/dialog";
   import { eventData } from "./utility/event";
   import { chromaKeyOutputPath, fileNameFromPath } from "./utility/path";
-
-  import {
-    CornerColorFromFile,
-    ProcessFile,
-  } from "../bindings/wails-chromakey/backend/ChromakeyService";
+  
+  import { CornerColorFromFile, ProcessFile } from "../bindings/wails-chromakey/backend/ChromakeyService";
 
   let inputPath = "";
   let outputPath = "";
