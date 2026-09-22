@@ -3,6 +3,7 @@
   import { Events } from "@wailsio/runtime";
   import { dialog } from "./utility/dialog";
   import { eventData } from "./utility/event";
+  import { chromaKeyOutputPath, fileNameFromPath } from "./utility/path";
 
   import {
     CornerColorFromFile,
@@ -19,63 +20,90 @@
   let error = "";
   let statusText = "";
 
-  function makeOutputPath(path: string): string {
-    const slash = Math.max(path.lastIndexOf("/"), path.lastIndexOf("\\"));
-    const dot = path.lastIndexOf(".");
-    const base = dot > slash ? path.slice(0, dot) : path;
-    const timestamp = makeTimestamp();
+  onMount(() => {
+    const unsubscribeDrop = Events.On("image-file-dropped", (event) => {
+      void imageFileDroppedAction(event);
+    });
 
-    return `${base}-${timestamp}.png`;
-  }
+    return () => {
+      unsubscribeDrop();
+    };
+  });
 
-  function makeTimestamp(): string {
-    return Date.now().toString();
-  }
+  /**
+   * 處理 Wails 的 image-file-dropped 事件
+   *
+   * Go 後端會在使用者將圖片拖入視窗時發送事件：
+   *
+   * ```go
+   * application.Get().Event.Emit("image-file-dropped", files)
+   * ```
+   *
+   * 前端收到的 payload 預期為 string[]，內容是被拖入圖片的本機絕對路徑
+   *
+   * 處理流程：
+   * 1. 從 Wails event 取出檔案路徑陣列
+   * 2. 驗證是否至少收到一個檔案
+   * 3. 使用第一個檔案作為目前來源圖片
+   * 4. 清除上一次圖片的輸出路徑、偵測結果、錯誤與狀態
+   * 5. 自動呼叫 Go 後端偵測圖片四角平均背景色
+   *
+   * @param event - Wails Events.On() callback 收到的事件物件或 payload
+   */
+  async function imageFileDroppedAction(event: unknown): Promise<void> {
+    
+    const files = eventData<string[]>(event);
 
-  function outputFileName(): string {
-    return outputPath.split(/[\\/]/).pop() ?? outputPath;
-  }
-
-  async function detectCornerColor(): Promise<void> {
-    const path = inputPath.trim();
-
-    if (!path) {
-      error = "請先輸入圖片的完整絕對路徑。";
+    if (!Array.isArray(files) || files.length === 0) {
+      error = "沒有收到有效的圖片檔案。";
+      statusText = "拖放圖片失敗";
+      await dialog("warning", statusText, error);
       return;
     }
 
-    processing = true;
+    inputPath = files[0];
+    outputPath = "";
     error = "";
-    statusText = "正在偵測背景色…";
+    statusText = "已載入圖片";
 
-    try {
-      detectedColor = await CornerColorFromFile(path, sampleSize);
-      statusText = "背景色偵測完成";
-    } catch (err) {
-      error = err instanceof Error ? err.message : String(err);
-      statusText = "背景色偵測失敗";
-    } finally {
-      processing = false;
-    }
+    await detectCornerColor();
   }
 
+  /**
+   * 執行 Chroma Key 去背並輸出透明 PNG
+   *
+   * 流程：
+   * 1. 驗證來源圖片路徑與已偵測的 Key Color
+   * 2. 依來源檔案自動建立帶 timestamp 的 PNG 輸出路徑
+   * 3. 建立 KeyParams
+   * 4. 呼叫 Go / Wails 的 ProcessFile()
+   * 5. 以原生系統 dialog 顯示成功或失敗結果
+   */
   async function processImage(): Promise<void> {
     const source = inputPath.trim();
-    outputPath = makeOutputPath(source);
-    const destination = outputPath.trim();
 
     if (!source) {
       error = "請先輸入來源圖片路徑。";
-      return;
-    }
-
-    if (!destination) {
-      error = "輸出路徑不可為空。";
+      statusText = "尚未選擇圖片";
+      await dialog("warning", statusText, error);
       return;
     }
 
     if (!detectedColor) {
       error = "請先偵測背景色。";
+      statusText = "尚未偵測背景色";
+      await dialog("warning", statusText, error);
+      return;
+    }
+
+    outputPath = chromaKeyOutputPath(source);
+
+    const destination = outputPath.trim();
+
+    if (!destination) {
+      error = "輸出路徑不可為空。";
+      statusText = "無法建立輸出路徑";
+      await dialog("error", statusText, error);
       return;
     }
 
@@ -94,39 +122,62 @@
     try {
       await ProcessFile(source, destination, params);
       statusText = "去背完成";
-      dialog("info", statusText, outputFileName());
+      await dialog("info", statusText, `已輸出 PNG：\n${fileNameFromPath(destination)}`);
     } catch (err) {
       error = err instanceof Error ? err.message : String(err);
       statusText = "去背失敗";
-      dialog("error", statusText, error);
+      await dialog("error", statusText, error);
     } finally {
       processing = false;
     }
   }
 
-  onMount(() => {
-    const unsubscribeDrop = Events.On("image-file-dropped", (event) => {
-      void imageFileDroppedAction(event);
-    });
+  /**
+   * 呼叫 Go 後端，從來源圖片四個角落取樣並取得平均背景色
+   *
+   * 成功時更新：
+   * - detectedColor：四角平均 RGB / Hex 色彩
+   * - statusText：背景色偵測完成。
+   *
+   * 失敗時更新：
+   * - error：可顯示的錯誤訊息
+   * - statusText：背景色偵測失敗
+   * - 原生錯誤 dialog
+   */
+  async function detectCornerColor(): Promise<void> {
+    const path = inputPath.trim();
 
-    return () => {
-      unsubscribeDrop();
-    };
-  });
-
-  async function imageFileDroppedAction(event: unknown): Promise<void> {
-    const files = eventData<string[]>(event);
-
-    if (!Array.isArray(files) || files.length === 0) {
-      error = "沒有收到有效的圖片檔案。";
+    if (!path) {
+      error = "請先輸入圖片的完整絕對路徑。";
+      statusText = "尚未選擇圖片";
+      await dialog("warning", statusText, error);
       return;
     }
 
-    inputPath = files[0];
-    outputPath = "";
+    processing = true;
     error = "";
+    statusText = "正在偵測背景色…";
 
-    await detectCornerColor();
+    try {
+      detectedColor = await CornerColorFromFile(path, sampleSize);
+      statusText = "背景色偵測完成";
+    } catch (err) {
+      error = errorMessage(err);
+      statusText = "背景色偵測失敗";
+      await dialog("error", statusText, error);
+    } finally {
+      processing = false;
+    }
+  }
+
+  /**
+   * 將 unknown error 轉成可顯示的文字
+   *
+   * @param error - try/catch 捕捉到的任意錯誤值
+   * @returns 可安全顯示在 UI 或 dialog 的錯誤訊息
+   */
+  function errorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
   }
 </script>
 
@@ -138,18 +189,11 @@
   <section class="card" data-file-drop-target>
     <label class="field">
       <span>來源圖片絕對路徑</span>
-      <input
-        bind:value={inputPath}
-        placeholder="/Users/ios/Desktop/images.jpg"
-      />
+      <input bind:value={inputPath} placeholder="/Users/your_name/Desktop/images.jpg"/>
     </label>
 
     <section class="color-result">
-      <div
-        class="swatch"
-        style={`background-color: ${detectedColor.hex}`}
-      ></div>
-
+      <div class="swatch" style={`background-color: ${detectedColor.hex}`}></div>
       <div class="color-info">
         <small>四角平均 Key Color</small>
         <strong>{detectedColor.hex}</strong>
@@ -174,12 +218,7 @@
       <input type="range" min="0" max="100" bind:value={softness} />
     </label>
 
-    <button
-      class="primary-button"
-      type="button"
-      disabled={processing || !detectedColor}
-      on:click={processImage}
-    >
+    <button class="primary-button" type="button" disabled={processing || !detectedColor} on:click={processImage}>
       {processing ? "處理中…" : "開始去背並輸出 PNG"}
     </button>
   </section>
