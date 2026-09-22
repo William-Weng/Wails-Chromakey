@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=Chroma Key
+Comment=綠幕去背小工具
+# The Exec line includes %u to pass the URL to the application
+Exec=/usr/local/bin/Chromakey %u
+Terminal=false
+Type=Application
+Icon=Chromakey
+Categories=Utility;
+StartupWMClass=Chromakey
+
+ 

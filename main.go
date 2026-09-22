@@ -1,0 +1,60 @@
+package main
+
+import (
+	"embed"
+
+	"log"
+
+	"wails-chromakey/backend"
+
+	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/wailsapp/wails/v3/pkg/events"
+)
+
+//go:embed all:frontend/dist
+var assets embed.FS
+
+func init() {
+}
+
+func main() {
+
+	app := application.New(application.Options{
+		Name: "綠幕去背小工具",
+		Services: []application.Service{
+			application.NewService(&backend.ChromakeyService{}),
+		},
+		Assets: application.AssetOptions{
+			Handler: application.AssetFileServerFS(assets),
+		},
+		Mac: application.MacOptions{
+			ApplicationShouldTerminateAfterLastWindowClosed: true,
+		},
+	})
+
+	app.Window.NewWithOptions(application.WebviewWindowOptions{
+		Title:          "綠幕去背小工具",
+		Width:          600,
+		Height:         600,
+		DisableResize:  true,
+		EnableFileDrop: true, // 開啟檔案拖放
+		URL:            "/",
+	}).OnWindowEvent(events.Common.WindowFilesDropped, func(event *application.WindowEvent) {
+		// 當使用者拖放檔案進視窗時觸發
+		ctx := event.Context()
+		files := ctx.DroppedFiles()
+
+		print(event)
+
+		if len(files) > 0 {
+			// 發送全域事件給前端
+			application.Get().Event.Emit("image-file-dropped", files)
+		}
+	})
+
+	err := app.Run()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
