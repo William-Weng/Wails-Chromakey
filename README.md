@@ -1,10 +1,17 @@
-# Wails-Chromakey
+# [Wails-Chromakey](https://v3.wails.io/features/drag-and-drop/files/)
+
+![Go](https://img.shields.io/badge/Go-1.27.1-00ADD8?logo=go&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-20.19.2-339933?logo=nodedotjs&logoColor=white)
+![Wails](https://img.shields.io/badge/Wails-v3.0.0--beta.20-DF0000?logo=wails&logoColor=white)
+![LICENSE](https://img.shields.io/github/license/William-Weng/Wails-Chromakey?style=flat&label=LICENSE&color=yellow)
+![Tag](https://img.shields.io/github/v/tag/William-Weng/Wails-Chromakey?style=flat&label=Tag)
+![Stars](https://img.shields.io/github/stars/William-Weng/Wails-Chromakey?style=flat&label=Stars)
 
 一個使用 **Wails 3**、**Go** 與 **Svelte 5** 製作的簡易去背工具。
 
 本專案可以將影片中的指定背景色移除，並輸出為透明背景的 PNG 素材，適合製作綠幕、藍幕或其他純色背景影片素材。
 
-## 功能特色
+## [功能特色](https://v3.wails.io/zh-tw/concepts/build-system/)
 
 - 支援影片去背處理。
 - 可調整取樣角落大小。
@@ -14,11 +21,11 @@
 - 輸出 PNG 素材。
 - 使用 Wails 3 建立桌面應用程式。
 
-## 操作介面
+## [操作介面](https://v3.wails.io/zh-tw/reference/cli/)
 
 https://github.com/user-attachments/assets/b7f9e4ae-dab8-4d0a-9313-8fe6e6624e44
 
-## 技術架構
+## [技術架構](https://v3.wails.io/zh-tw/tutorials/01-creating-a-service/)
 
 - [Wails 3](https://v3.wails.io/)
 - [Go](https://go.dev/)
