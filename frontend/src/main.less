@@ -1,0 +1,161 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    overflow: hidden;
+    background: #2d2d2d;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button,
+select {
+    cursor: pointer;
+}
+
+/* 頁面四邊不留白；padding 只作為內容的內縮距離 */
+.page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 0;
+}
+
+/* 主卡片滿版，不設定 max-width */
+.card {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 30px 48px 36px;
+    border: 0;
+    border-radius: 0;
+    background: #fff;
+    box-shadow: none;
+}
+
+.field,
+.slider-field {
+    width: 100%;
+    display: grid;
+    gap: 10px;
+}
+
+.field>span,
+.slider-field>span {
+    color: #5c6b7f;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.field input {
+    width: 100%;
+    height: 52px;
+    padding: 0 17px;
+    border: 1px solid #bdc7d5;
+    border-radius: 11px;
+    outline: none;
+    background: #202020;
+    color: #f3f4f6;
+    font-size: 15px;
+}
+
+.field input:focus {
+    border-color: #3478f6;
+    box-shadow: 0 0 0 3px rgba(52, 120, 246, 0.14);
+}
+
+.color-result {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 22px;
+    padding: 22px 20px;
+    border: 1px solid #dce4ef;
+    border-radius: 14px;
+    background: #f9fbfe;
+}
+
+.swatch {
+    width: 74px;
+    height: 74px;
+    flex: 0 0 auto;
+    border: 1px solid #94b2ce;
+    border-radius: 13px;
+}
+
+.color-info {
+    display: grid;
+    gap: 4px;
+}
+
+.color-info small {
+    color: #8a99ad;
+    font-size: 16px;
+}
+
+.color-info strong {
+    color: #263548;
+    font-size: 27px;
+    letter-spacing: 0.4px;
+}
+
+.color-info span {
+    color: #8a99ad;
+    font-size: 16px;
+}
+
+/* 三個滑桿統一滿寬 */
+.slider-field {
+    margin-top: 24px;
+}
+
+input[type="range"] {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 22px;
+    margin: 0;
+    padding: 0;
+    accent-color: #8e8997;
+    cursor: pointer;
+}
+
+.primary-button {
+    display: block;
+    width: 100%;
+    height: 53px;
+    margin-top: 25px;
+    border: 0;
+    border-radius: 11px;
+    background: #3478f6;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.primary-button:hover:not(:disabled) {
+    background: #2469e8;
+}
+
+.primary-button:disabled {
+    cursor: wait;
+    opacity: 0.55;
+}

@@ -40,14 +40,11 @@ func main() {
 		EnableFileDrop: true, // 開啟檔案拖放
 		URL:            "/",
 	}).OnWindowEvent(events.Common.WindowFilesDropped, func(event *application.WindowEvent) {
-		// 當使用者拖放檔案進視窗時觸發
+
 		ctx := event.Context()
 		files := ctx.DroppedFiles()
 
-		print(event)
-
 		if len(files) > 0 {
-			// 發送全域事件給前端
 			application.Get().Event.Emit("image-file-dropped", files)
 		}
 	})
