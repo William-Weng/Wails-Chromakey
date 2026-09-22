@@ -102,11 +102,35 @@ input[type="text"] {
 }
 
 .swatch {
+
     width: 74px;
     height: 74px;
     flex: 0 0 auto;
     border: 1px solid #94b2ce;
     border-radius: 13px;
+
+    position: relative;
+    display: block;
+    cursor: pointer;
+    overflow: hidden;
+
+    -webkit-app-region: no-drag;
+}
+
+.swatch input[type="color"] {
+    position: absolute;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+    padding: 0;
+
+    border: 0;
+    opacity: 0;
+
+    cursor: pointer;
+
+    -webkit-app-region: no-drag;
 }
 
 .color-info {

@@ -169,6 +169,42 @@
   }
 
   /**
+   * 處理 HTML color input 的顏色變更事件
+   *
+   * 使用者從調色盤選擇顏色後，會執行這個函式，並同步更新 detectedColor 的 HEX 與 RGB 值
+   *
+   * @param event color input 的 change 事件
+   */ 
+  function handleColorChange(event: Event) {
+
+    const input = event.currentTarget as HTMLInputElement;
+    const hex = input.value.toUpperCase();
+    const rgb = hexToRgb(hex);
+
+    detectedColor = { hex,...rgb };
+  }
+
+  /**
+   * 將 HEX 色碼轉換成 RGB 色彩值
+   *
+   * 例如：
+   * "#00FF00" 會轉換成： {"r": 0, "g": 255, "b": 0}
+   *
+   * @param hex HEX 顏色字串，例如 "#00FF00"
+   * @returns 包含紅、綠、藍三個色彩通道的物件
+   */
+  function hexToRgb(hex: string) {
+
+      const value = hex.replace('#', '');
+
+      return {
+          r: parseInt(value.slice(0, 2), 16),
+          g: parseInt(value.slice(2, 4), 16),
+          b: parseInt(value.slice(4, 6), 16)
+      };
+  }
+
+  /**
    * 將 unknown error 轉成可顯示的文字
    *
    * @param error - try/catch 捕捉到的任意錯誤值
@@ -191,7 +227,19 @@
     </label>
 
     <section class="color-result">
-      <div class="swatch" style={`background-color: ${detectedColor.hex}`}></div>
+
+    <label
+        class="swatch"
+        style={`background-color: ${detectedColor.hex}`}
+        aria-label="選擇 Key Color"
+    >
+        <input
+            type="color"
+            value={detectedColor.hex}
+            on:change={handleColorChange}
+        />
+    </label>
+
       <div class="color-info">
         <small>四角平均 Key Color</small>
         <strong>{detectedColor.hex}</strong>
