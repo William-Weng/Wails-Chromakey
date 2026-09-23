@@ -11,7 +11,7 @@ info:
   description: "綠幕去背小工具"
   copyright: "Copyright © 2026, William Weng"
   comments: "Built with Wails, Go, Svelte"
-  version: "0.1.1"
+  version: "0.2.1"
 
 dev_mode:
   root_path: .

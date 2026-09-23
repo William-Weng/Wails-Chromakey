@@ -16,6 +16,10 @@ body,
 body {
     overflow: hidden;
     background: #2d2d2d;
+
+    // Wails 無邊框視窗的拖曳區設定
+    // 如果整個 body 設定為 drag，互動元件需要覆蓋成 no-drag
+    -webkit-app-region: drag;
 }
 
 button,
@@ -30,23 +34,27 @@ select {
     cursor: pointer;
 }
 
+// 所有互動元件禁止拖動整個視窗
 .slider-field,
 .slider-field input,
 input[type="range"],
+input[type="color"],
+input[type="text"],
 button,
-input[type="text"] {
+select,
+textarea {
     --wails-draggable: no-drag;
     -webkit-app-region: no-drag;
 }
 
-/* 頁面四邊不留白；padding 只作為內容的內縮距離 */
+// 頁面四邊不留白
 .page {
     width: 100%;
     min-height: 100vh;
     padding: 0;
 }
 
-/* 主卡片滿版，不設定 max-width */
+// 主卡片滿版
 .card {
     width: 100%;
     min-height: 100vh;
@@ -58,6 +66,7 @@ input[type="text"] {
     box-shadow: none;
 }
 
+// 一般欄位與滑桿欄位
 .field,
 .slider-field {
     width: 100%;
@@ -65,30 +74,34 @@ input[type="text"] {
     gap: 10px;
 }
 
-.field>span,
-.slider-field>span {
+.field > span,
+.slider-field > span {
     color: #5c6b7f;
     font-size: 16px;
     font-weight: 800;
 }
 
-.field input {
-    width: 100%;
-    height: 52px;
-    padding: 0 17px;
-    border: 1px solid #bdc7d5;
-    border-radius: 11px;
-    outline: none;
-    background: #202020;
-    color: #f3f4f6;
-    font-size: 15px;
+// 來源圖片路徑輸入框
+.field {
+    input {
+        width: 100%;
+        height: 52px;
+        padding: 0 17px;
+        border: 1px solid #bdc7d5;
+        border-radius: 11px;
+        outline: none;
+        background: #202020;
+        color: #f3f4f6;
+        font-size: 15px;
+
+        &:focus {
+            border-color: #3478f6;
+            box-shadow: 0 0 0 3px rgba(52, 120, 246, 0.14);
+        }
+    }
 }
 
-.field input:focus {
-    border-color: #3478f6;
-    box-shadow: 0 0 0 3px rgba(52, 120, 246, 0.14);
-}
-
+// 顏色結果區域
 .color-result {
     width: 100%;
     display: flex;
@@ -99,137 +112,150 @@ input[type="text"] {
     border: 1px solid #dce4ef;
     border-radius: 14px;
     background: #f9fbfe;
+
+    // 可點擊的色塊
+    .swatch {
+        position: relative;
+        display: block;
+        width: 74px;
+        height: 74px;
+        flex: 0 0 auto;
+        overflow: hidden;
+
+        border: 1px solid #94b2ce;
+        border-radius: 13px;
+
+        cursor: pointer;
+        -webkit-app-region: no-drag;
+
+        // 隱藏原生 input，但保留點擊功能
+        input[type="color"] {
+            position: absolute;
+            inset: 0;
+
+            width: 100%;
+            height: 100%;
+            padding: 0;
+
+            border: 0;
+            opacity: 0;
+
+            cursor: pointer;
+            -webkit-app-region: no-drag;
+        }
+    }
+
+    .color-info {
+        display: grid;
+        gap: 4px;
+
+        small {
+            color: #8a99ad;
+            font-size: 16px;
+        }
+
+        strong {
+            color: #263548;
+            font-size: 27px;
+            letter-spacing: 0.4px;
+        }
+
+        span {
+            color: #8a99ad;
+            font-size: 16px;
+        }
+    }
 }
 
-.swatch {
-
-    width: 74px;
-    height: 74px;
-    flex: 0 0 auto;
-    border: 1px solid #94b2ce;
-    border-radius: 13px;
-
-    position: relative;
-    display: block;
-    cursor: pointer;
-    overflow: hidden;
-
-    -webkit-app-region: no-drag;
-}
-
-.swatch input[type="color"] {
-    position: absolute;
-    inset: 0;
-
-    width: 100%;
-    height: 100%;
-    padding: 0;
-
-    border: 0;
-    opacity: 0;
-
-    cursor: pointer;
-
-    -webkit-app-region: no-drag;
-}
-
-.color-info {
-    display: grid;
-    gap: 4px;
-}
-
-.color-info small {
-    color: #8a99ad;
-    font-size: 16px;
-}
-
-.color-info strong {
-    color: #263548;
-    font-size: 27px;
-    letter-spacing: 0.4px;
-}
-
-.color-info span {
-    color: #8a99ad;
-    font-size: 16px;
-}
-
-/* 三個滑桿統一滿寬 */
+// 三個滑桿統一滿寬
 .slider-field {
     margin-top: 16px;
+
+    input[type="range"] {
+        display: block;
+        width: 100%;
+        height: 28px;
+        margin: 0;
+        padding: 0;
+
+        appearance: none;
+        -webkit-appearance: none;
+        background: transparent;
+
+        accent-color: #8e8997;
+        cursor: pointer;
+
+        // 避免拖曳滑桿時移動頁面或視窗
+        touch-action: none;
+        overscroll-behavior: none;
+
+        // Chrome、Safari、Edge
+        &::-webkit-slider-runnable-track {
+            height: 16px;
+            border-radius: 999px;
+            background: #c8c8c8;
+        }
+
+        &::-webkit-slider-thumb {
+            width: 40px;
+            height: 40px;
+            margin-top: -12px;
+
+            appearance: none;
+            -webkit-appearance: none;
+
+            border: 0;
+            border-radius: 50%;
+            background: #8e8997;
+        }
+
+        // Firefox
+        &::-moz-range-track {
+            height: 16px;
+            border-radius: 999px;
+            background: #c8c8c8;
+        }
+
+        &::-moz-range-thumb {
+            width: 40px;
+            height: 40px;
+
+            border: 0;
+            border-radius: 50%;
+            background: #8e8997;
+        }
+
+        // 鍵盤操作時顯示焦點
+        &:focus-visible {
+            outline: 3px solid rgba(52, 120, 246, 0.3);
+            outline-offset: 4px;
+        }
+    }
 }
 
-input[type="range"] {
-    display: block;
-    width: 100%;
-    height: 28px;
-    margin: 0;
-    padding: 0;
-    appearance: none;
-    -webkit-appearance: none;
-    background: transparent;
-    accent-color: #8e8997;
-    cursor: pointer;
-}
-
-/* Chrome / Safari / Edge */
-input[type="range"]::-webkit-slider-runnable-track {
-    height: 16px;
-    border-radius: 999px;
-    background: #c8c8c8;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-    width: 40px;
-    height: 40px;
-    margin-top: -12px;
-    border: 0;
-    border-radius: 50%;
-    background: #8e8997;
-    appearance: none;
-    -webkit-appearance: none;
-}
-
-/* Firefox */
-input[type="range"]::-moz-range-track {
-    height: 80px;
-    border-radius: 999px;
-    background: #c8c8c8;
-}
-
-input[type="range"]::-moz-range-thumb {
-    width: 22px;
-    height: 22px;
-    border: 0;
-    border-radius: 50%;
-    background: #8e8997;
-}
-
-/* 鍵盤操作時顯示焦點 */
-input[type="range"]:focus-visible {
-    outline: 3px solid rgba(52, 120, 246, 0.3);
-    outline-offset: 4px;
-}
-
+// 主要按鈕
 .primary-button {
     display: block;
     width: 100%;
     height: 53px;
     margin-top: 25px;
+
     border: 0;
     border-radius: 11px;
     background: #3478f6;
+
     color: #fff;
     font-size: 16px;
     font-weight: 800;
+
     cursor: pointer;
-}
 
-.primary-button:hover:not(:disabled) {
-    background: #2469e8;
-}
+    &:hover:not(:disabled) {
+        background: #2469e8;
+    }
 
-.primary-button:disabled {
-    cursor: wait;
-    opacity: 0.55;
+    &:disabled {
+        cursor: wait;
+        opacity: 0.55;
+    }
 }

@@ -34,9 +34,10 @@ func main() {
 
 	app.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:          "綠幕去背小工具",
-		Width:          600,
-		Height:         600,
-		DisableResize:  true,
+		Width:          381,
+		Height:         573,
+		MinWidth:       380,
+		MinHeight:      600,
 		EnableFileDrop: true, // 開啟檔案拖放
 		URL:            "/",
 	}).OnWindowEvent(events.Common.WindowFilesDropped, func(event *application.WindowEvent) {
