@@ -59,10 +59,11 @@ wails3 dev
 
 開發期間修改 Go、Svelte 或樣式檔案後，Wails 會重新建置或更新應用程式。
 
-## 建置指令整理
+## [建置指令整理](https://v3.wails.io/zh-tw/guides/build/building/)
 
 | 目的 | 指令 |
 | --- | --- |
+| 建立新專案 | `wails3 init -n <專案名稱> -t <前端框架>` |
 | 產生 bindings | `wails3 generate bindings` |
 | 更新建置資源 | `wails3 task common:update:build-assets` |
 | 建置 Windows x64 | `wails3 build GOOS=windows GOARCH=amd64` |
