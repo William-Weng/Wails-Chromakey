@@ -11,6 +11,10 @@
 
 本專案可以將影片中的指定背景色移除，並輸出為透明背景的 PNG 素材，適合製作綠幕、藍幕或其他純色背景影片素材。
 
+## [操作介面](https://v3.wails.io/zh-tw/reference/cli/)
+
+https://github.com/user-attachments/assets/2c633051-4cb7-4c84-9af8-a4c0c1ad9584
+
 ## [功能特色](https://v3.wails.io/zh-tw/concepts/build-system/)
 
 - 支援影片去背處理。
@@ -20,10 +24,6 @@
 - 以四角平均色作為 Key Color。
 - 輸出 PNG 素材。
 - 使用 Wails 3 建立桌面應用程式。
-
-## [操作介面](https://v3.wails.io/zh-tw/reference/cli/)
-
-https://github.com/user-attachments/assets/b7f9e4ae-dab8-4d0a-9313-8fe6e6624e44
 
 ## [技術架構](https://v3.wails.io/zh-tw/tutorials/01-creating-a-service/)
 
