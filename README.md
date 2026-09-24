@@ -86,7 +86,7 @@ wails3 dev
 
 - 在開發模式下，可以使用原系統的瀏覽器工具Debug。
 
-<img width="720" alt="Debug" src="https://github.com/user-attachments/assets/9159fac6-8f00-471b-8e5b-58a440577dfd" />
+<img width="720" alt="Debug" src="https://github.com/user-attachments/assets/084721e0-ab7b-4c53-ac69-ce0f0dde38c0" />
 
 ## 使用流程
 
