@@ -4,19 +4,33 @@
 
   import { dialog } from "./utility/dialog";
   import { eventData } from "./utility/event";
+  import { errorMessage } from "./utility/message";
+  import { hexToRgb } from "./utility/string";
   import { chromaKeyOutputPath, fileNameFromPath } from "./utility/path";
   
   import { CornerColorFromFile, ProcessFile } from "../bindings/wails-chromakey/backend/ChromakeyService";
+  
+  const backgroundUrl = "/bg-desktop.png";
+  const sampleSizeRange = { min: 1, max: 100, step: 1 }
+  const toleranceRange = { min: 0, max: 100, step: 1 }
+  const softnessRange = { min: 0, max: 100, step: 1 }
 
   let inputPath = "";
   let outputPath = "";
-  let sampleSize = 16;
-  let tolerance = 16;
-  let softness = 16;
-  let detectedColor: ColorResult = { r: 0, g: 255, b: 0, hex: "#00FF00" };
+
   let processing = false;
   let error = "";
   let statusText = "";
+
+  let sampleSize = 16;
+  let tolerance = 16;
+  let softness = 16;
+  
+  let detectedColor: ColorResult = { r: 0, g: 255, b: 0, hex: "#00FF00" };
+
+  $: sampleSizeRatio = ((sampleSize - sampleSizeRange.min) / (sampleSizeRange.max - sampleSizeRange.min)) * 100;
+  $: toleranceRatio = ((tolerance - toleranceRange.min) / (toleranceRange.max - toleranceRange.min)) * 100;
+  $: softnessRatio = ((softness - softnessRange.min) / (softnessRange.max - softnessRange.min)) * 100;
 
   onMount(() => {
     const unsubscribeDrop = Events.On("image-file-dropped", (event) => {
@@ -183,41 +197,7 @@
 
     detectedColor = { hex,...rgb };
   }
-
-  /**
-   * 將 HEX 色碼轉換成 RGB 色彩值
-   *
-   * 例如：
-   * "#00FF00" 會轉換成： {"r": 0, "g": 255, "b": 0}
-   *
-   * @param hex HEX 顏色字串，例如 "#00FF00"
-   * @returns 包含紅、綠、藍三個色彩通道的物件
-   */
-  function hexToRgb(hex: string) {
-
-      const value = hex.replace('#', '');
-
-      return {
-          r: parseInt(value.slice(0, 2), 16),
-          g: parseInt(value.slice(2, 4), 16),
-          b: parseInt(value.slice(4, 6), 16)
-      };
-  }
-
-  /**
-   * 將 unknown error 轉成可顯示的文字
-   *
-   * @param error - try/catch 捕捉到的任意錯誤值
-   * @returns 可安全顯示在 UI 或 dialog 的錯誤訊息
-   */
-  function errorMessage(error: unknown): string {
-    return error instanceof Error ? error.message : String(error);
-  }
 </script>
-
-<svelte:head>
-  <title>綠幕去背小工具</title>
-</svelte:head>
 
 <main class="page">
   <section class="card" data-file-drop-target>
@@ -228,16 +208,8 @@
 
     <section class="color-result">
 
-    <label
-        class="swatch"
-        style={`background-color: ${detectedColor.hex}`}
-        aria-label="選擇 Key Color"
-    >
-        <input
-            type="color"
-            value={detectedColor.hex}
-            on:change={handleColorChange}
-        />
+    <label class="swatch" style={`background-color: ${detectedColor.hex}`} aria-label="選擇 Key Color">
+        <input type="color" value={detectedColor.hex} on:change={handleColorChange} />
     </label>
 
       <div class="color-info">
@@ -267,5 +239,56 @@
     <button class="primary-button" type="button" disabled={processing || !detectedColor} on:click={processImage}>
       {processing ? "處理中…" : "開始去背並輸出 PNG"}
     </button>
+  </section>
+</main> -->
+
+<main class="fullscreen-bg" style="--background-url: url({backgroundUrl})">
+  <section class="page" data-file-drop-target>
+    <section class="card translucent">
+      <section class="input-field">
+        <label for="source-image-path">來源圖片絕對路徑</label>
+        <input id="source-image-path" type="text" bind:value={inputPath} placeholder="/Users/<YourName>/Desktop/images.jpg" />
+      </section>
+    </section>
+    <section class="card translucent">
+      <div class="key-color">
+        <div class="color-swatch" style="--chroma-color: {detectedColor.hex}" aria-hidden="true">
+          <input type="color" value={detectedColor.hex} on:change={handleColorChange}/>
+        </div>
+        <div class="key-color-code">
+          <div class="color-label">四角平均色</div>
+          <div class="color-label-hex">{detectedColor.hex}</div>
+          <div class="color-label-rgb">RGB({detectedColor.r},{detectedColor.g},{detectedColor.b})</div>
+        </div>
+      </div>
+    </section>
+    <section class="card translucent">
+      <div class="input-sliders">
+        <section class="slider-field">
+          <div class="slider-header">
+            <label for="sample-size">角落取樣大小</label>
+            <output for="sample-size">{sampleSize}px</output>
+          </div>
+          <input id="sample-size" type="range" min={sampleSizeRange.min} max={sampleSizeRange.max} step={sampleSizeRange.step} style:--ratio="{sampleSizeRatio}%" bind:value={sampleSize} />
+        </section>
+        <section class="slider-field">
+          <div class="slider-header">
+            <label for="tolerance">容許差異</label>
+            <output for="tolerance">{tolerance}</output>
+          </div>
+          <input id="tolerance" type="range" min={toleranceRange.min} max={toleranceRange.max} step={toleranceRange.step} style:--ratio="{toleranceRatio}%" bind:value={tolerance} />
+        </section>
+        <section class="slider-field">
+          <div class="slider-header">
+            <label for="softness">邊緣柔化</label>
+            <output for="softness">{softness}</output>
+          </div>
+          <input id="softness" type="range" min={softnessRange.min} max={softnessRange.max} step={softnessRange.step} style:--ratio="{softnessRatio}%" bind:value={softness} />
+        </section>
+      </div>
+    </section>
+    <section class="submit-container">
+      <input class="submit-action" type="button" value={processing ? "處理中…" : "開始去背"} disabled={processing || !detectedColor} on:click={processImage}/>
+    </section>
   </section>
 </main>

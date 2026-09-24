@@ -14,14 +14,12 @@ import (
 
 // 讀取來源圖片檔案，套用 Chroma Key 去背，並輸出透明背景 PNG
 //
-// 參數：
-//
+// 輸入：
 //   - inputPath：來源圖片的本機絕對或相對檔案路徑
 //   - outputPath：輸出 PNG 的目標檔案路徑
-//   - params：Chroma Key 去背設定。
+//   - params：Chroma Key 去背設定
 //
 // 回傳：
-//
 //   - nil：圖片處理與 PNG 輸出成功
 //   - error：開檔、建立輸出檔、圖片解碼、去背或 PNG 編碼失敗
 func sampleCornerColor(img image.Image, sampleSize int) (r, g, b uint8) {
@@ -38,16 +36,14 @@ func sampleCornerColor(img image.Image, sampleSize int) (r, g, b uint8) {
 	return averageColor(img, sampleSize, corners)
 }
 
-// 從圖片四個角落取樣，計算並回傳平均 RGB 顏色
+// 處理單一圖片檔案：開啟輸入檔與輸出檔，並委託給 processReaderWriter 實際處理
 //
-// 參數：
-//   - img：已解碼的來源圖片
-//   - sampleSize：每一個角落取樣區域的正方形邊長，單位為像素
+// 輸入：
+//   - inputPath: 輸入圖片路徑
+//   - outputPath: 輸出圖片路徑
+//   - params: 處理參數（例如品質、縮放等）
 //
-// 回傳：
-//   - r：四個角落所有有效取樣像素的平均紅色通道值，範圍 0～255
-//   - g：四個角落所有有效取樣像素的平均綠色通道值，範圍 0～255
-//   - b：四個角落所有有效取樣像素的平均藍色通道值，範圍 0～255
+// 回傳：錯誤訊息（若有）
 func processFile(inputPath string, outputPath string, params KeyParams) error {
 
 	input, err := os.Open(inputPath)

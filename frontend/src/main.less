@@ -1,261 +1,385 @@
-* {
+@page-padding: 16px;
+@border-radius: 8px;
+@color-swatch-width: 80px;
+@overlay-color: rgba(0, 0, 0, 0.35);
+@mono-fonts: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+@input-focus-transition: border-color 0.25s ease, background-color 0.25s ease, box-shadow 0.25s ease;
+@slider-transition: transform 0.15s ease, box-shadow 0.15s ease;
+@submit-transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+
+/* 將所有元素及偽元素的盒模型改為 border-box，確保 padding 和 border 不會撐開寬度 */
+*, *::before, *::after {
     box-sizing: border-box;
 }
 
-html,
-body,
-#app {
-    width: 100%;
-    height: 100%;
-    min-width: 0;
-    min-height: 0;
-    margin: 0;
-    padding: 0;
-}
-
+/* 預設整個視窗都可以拖拽 */
 body {
     overflow: hidden;
     background: #2d2d2d;
-
-    // Wails 無邊框視窗的拖曳區設定
-    // 如果整個 body 設定為 drag，互動元件需要覆蓋成 no-drag
     -webkit-app-region: drag;
 }
 
-button,
-input,
-select,
-textarea {
-    font: inherit;
-}
-
-button,
-select {
-    cursor: pointer;
-}
-
-// 所有互動元件禁止拖動整個視窗
-.slider-field,
-.slider-field input,
-input[type="range"],
-input[type="color"],
-input[type="text"],
-button,
-select,
-textarea {
+/* 自動排除所有需要互動的元件，讓它們恢復正常的點擊與拖曳功能 */
+.slider-field, .slider-field input, input[type="range"], input[type="color"], input[type="text"] {
     --wails-draggable: no-drag;
     -webkit-app-region: no-drag;
 }
 
-// 頁面四邊不留白
+/* 毛玻璃背景 */
+.translucent {
+    backdrop-filter: blur(5px); // 毛玻璃模糊效果
+    border: 1px solid rgba(255, 255, 255, 0.25); // 細的白色邊框
+    border-radius: @border-radius; // 圓角
+}
+
+/* 全畫面背景層 */
+.fullscreen-bg {
+    background-image: var(--background-url); // 使用 CSS 變數 --background-url 作為背景圖
+    background-size: cover; // 背景圖等比例縮放，填滿整個容器
+    background-position: center; // 以圖片中心為基準對齊
+    background-repeat: no-repeat; // 不要重複平鋪
+
+    position: fixed; // 固定定位，相對於瀏覽器視窗
+    inset: 0; // 上、右、下、左都貼齊視窗邊緣
+
+    display: flex; // 讓內部內容置中
+    justify-content: center; // 水平置中
+    align-items: center; // 垂直置中
+
+    // 用 ::after 偽元素加一層半透明遮罩
+    &::after {
+        content: ""; // 偽元素必須有 content 才會渲染
+        position: absolute; // 相對於 .fullscreen-bg 定位
+        inset: 0; // 貼滿整個 .fullscreen-bg
+        background: @overlay-color; // 半透明黑色遮罩
+        pointer-events: none; // 不攔截滑鼠事件
+    }
+}
+
+/* 距離邊邊 16px 的半透明框 */
 .page {
-    width: 100%;
-    min-height: 100vh;
-    padding: 0;
+
+    width: calc(100% - 2 * @page-padding); // 寬度 = 視窗寬度 - 左右各 16px
+    height: calc(100% - 2 * @page-padding); // 高度 = 視窗高度 - 上下各 16px
+
+    position: relative; // 相對定位
+
+    display: flex;
+    flex-direction: column; // 垂直排列兩個 card
+    gap: 8px; // 兩個 card 之間的間距（可調）
 }
 
-// 主卡片滿版
+/* 卡片外框比例 / 間距設定 */
 .card {
-    width: 100%;
-    min-height: 100vh;
-    margin: 0;
-    padding: 30px 48px 36px;
-    border: 0;
-    border-radius: 0;
-    background: #fff;
-    box-shadow: none;
+
+    padding: @page-padding;
+
+    &:nth-child(1) {
+        flex: 0 0 auto;
+    }
+
+    &:nth-child(2) {
+        flex: 0 0 auto;
+    }
+
+    &:nth-child(3) {
+        flex: 0 0 auto;
+    }
+
+    &:nth-child(4) {
+        flex: 1 0 0;
+    }
 }
 
-// 一般欄位與滑桿欄位
-.field,
-.slider-field {
-    width: 100%;
-    display: grid;
-    gap: 10px;
-}
+/* 來源圖片路徑輸入框 */
+.input-field {
 
-.field > span,
-.slider-field > span {
-    color: #5c6b7f;
-    font-size: 16px;
-    font-weight: 800;
-}
+    display: flex;
+    flex-direction: column; // label 在上、input 在下
 
-// 來源圖片路徑輸入框
-.field {
+    gap: 8px; // label 與輸入框之間的距離
+    width: 100%; // 填滿 card 的內容寬度
+
+    /* 輸入框提示字 */
+    label {
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.4;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* 圖片路徑輸入框 */
     input {
-        width: 100%;
-        height: 52px;
-        padding: 0 17px;
-        border: 1px solid #bdc7d5;
-        border-radius: 11px;
-        outline: none;
-        background: #202020;
-        color: #f3f4f6;
-        font-size: 15px;
+        width: 100%; // 填滿 .input-field；min-width: 0 可避免 flex 情境下因長字串溢出
+        padding: 12px 14px; // 內距：上下 12px、左右 14px
 
+        // 延續父層的字型設定
+        font: inherit;
+        line-height: 1.4;
+        color: rgba(255, 255, 255, 0.95);
+
+        // 半透明深色輸入框，使白字更清楚
+        background: rgba(0, 0, 0, 0.24);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: calc(@border-radius * 0.75);
+        outline: none;
+
+        transition: @input-focus-transition;
+
+        // 尚未輸入時的提示字
+        &::placeholder {
+            color: rgba(255, 255, 255, 0.48);
+        }
+
+        // 點擊或使用 Tab 聚焦時
         &:focus {
-            border-color: #3478f6;
-            box-shadow: 0 0 0 3px rgba(52, 120, 246, 0.14);
+            background: rgba(0, 0, 0, 0.38);
+            border-color: rgba(125, 183, 255, 0.9);
+            box-shadow: 0 0 0 3px rgba(90, 156, 255, 0.25);
         }
     }
 }
 
-// 顏色結果區域
-.color-result {
-    width: 100%;
+/* 一列「色票 + 文字」的容器 */
+.key-color {
+
+    width: 100%; // 佔滿 card 的可用寬度
+    height: 100%;
+    align-items: center; // 讓色票與文字在垂直方向置中
+
     display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-top: 22px;
-    padding: 22px 20px;
-    border: 1px solid #dce4ef;
-    border-radius: 14px;
-    background: #f9fbfe;
+    flex-direction: row; // 讓兩個直接子元素水平排列
+    gap: 12px; // 色票和文字框中間的空隙
+}
 
-    // 可點擊的色塊
-    .swatch {
-        position: relative;
-        display: block;
-        width: 74px;
-        height: 74px;
-        flex: 0 0 auto;
-        overflow: hidden;
+/* 固定大小的正方形色票 */
+.color-swatch {
 
-        border: 1px solid #94b2ce;
-        border-radius: 13px;
+    position: relative; // 必須加上這行，內部 absolute 的 input 才能正確填滿
+
+    width: @color-swatch-width;
+    height: @color-swatch-width;
+
+    background: var(--chroma-color); // 示範顏色；之後可以改用 CSS 變數動態傳入
+    border-radius: @border-radius; // 色票的圓角
+    border: 1px solid rgba(255, 255, 255, 0.45); // 淡淡的白色邊框，玻璃卡片背景上更容易辨認
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25); // 小陰影，讓色票有立體感
+
+    flex: 0 0 @color-swatch-width; // flex 容器空間不夠時，不要把色票壓扁
+
+    // 隱藏原生 input，但保留點擊功能
+    input[type="color"] {
+        position: absolute;
+        inset: 0;
+
+        width: 100%;
+        height: 100%;
+
+        border: 0;
+        opacity: 0;
 
         cursor: pointer;
         -webkit-app-region: no-drag;
-
-        // 隱藏原生 input，但保留點擊功能
-        input[type="color"] {
-            position: absolute;
-            inset: 0;
-
-            width: 100%;
-            height: 100%;
-            padding: 0;
-
-            border: 0;
-            opacity: 0;
-
-            cursor: pointer;
-            -webkit-app-region: no-drag;
-        }
-    }
-
-    .color-info {
-        display: grid;
-        gap: 4px;
-
-        small {
-            color: #8a99ad;
-            font-size: 16px;
-        }
-
-        strong {
-            color: #263548;
-            font-size: 27px;
-            letter-spacing: 0.4px;
-        }
-
-        span {
-            color: #8a99ad;
-            font-size: 16px;
-        }
     }
 }
 
-// 三個滑桿統一滿寬
+/* 去背顏色數值顯示 */
+.key-color-code {
+
+    min-width: 0; // 避免文字很長時把色票推出容器
+
+    display: flex;
+    flex-direction: column; // 三行垂直排列
+    flex: 1; // 填滿剩餘寬度
+    gap: 4px; // 每行間距
+}
+
+/* 色彩名稱，例如「四角平均色」 */
+.color-label {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.95);
+}
+
+/* Hex 色碼，例如 #7db7ff */
+.color-label-hex {
+    font-family: @mono-fonts;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.78);
+}
+
+/* RGB 色碼，例如 RGB(125, 183, 255) */
+.color-label-rgb {
+    font-family: @mono-fonts;
+    font-size: 0.85rem;
+    line-height: 1.35;
+    color: rgba(255, 255, 255, 0.58);
+}
+
+/* 滑軌設定值總外框 */
+.input-sliders {
+
+    width: 100%; // 填滿父 card 的可用寬度與高度
+    height: 100%;
+    min-height: 0; // 避免容器本身在 flex 布局中無法正確縮小
+
+    display: flex;
+    flex-direction: column; // 讓三個 slider-field 由上到下排列
+    flex: 1 1 0;
+    gap: 16px; // 三個欄位間的距離
+
+}
+
+/* 滑軌文字 / 數值 */
+.slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+
+    /* 滑軌文字 */
+    label {
+        min-width: 0;
+
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.4;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* 滑軌數值 */
+    output {
+        flex: 0 0 auto;
+        white-space: nowrap;
+
+        font-family: @mono-fonts;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        color: rgba(255, 255, 255, 0.7);
+    }
+}
+
+/* 設定值滑軌 */
 .slider-field {
-    margin-top: 16px;
 
+    display: flex;
+    flex-direction: column; // 欄位內部仍保持：標題在上、slider 在下
+    flex: 1 1 0; // 三個欄位平均分配 .input-sliders 的可用高度
+    gap: 10px; // 標題和 range 之間的間距
+
+    /* 自訂定滑軌外形 */
     input[type="range"] {
-        display: block;
+
         width: 100%;
-        height: 28px;
-        margin: 0;
-        padding: 0;
-
-        appearance: none;
-        -webkit-appearance: none;
+        cursor: pointer; // 因為 slider 的 thumb 比 track 高，讓手指／滑鼠更容易點到與拖曳
         background: transparent;
+        outline: none;
+        appearance: none; // 移除瀏覽器預設外觀，才可完整自訂軌道與圓鈕
+        -webkit-appearance: none;
 
-        accent-color: #8e8997;
-        cursor: pointer;
-
-        // 避免拖曳滑桿時移動頁面或視窗
-        touch-action: none;
-        overscroll-behavior: none;
-
-        // Chrome、Safari、Edge
+        // WebKit：滑軌本體
         &::-webkit-slider-runnable-track {
-            height: 16px;
+
+            height: 10px; // 軌道變粗
+
             border-radius: 999px;
-            background: #c8c8c8;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 1px rgba(255, 255, 255, 0.12); // 陰影增加與玻璃背景的對比
+
+            background: linear-gradient(to right,
+                    #7db7ff 0%,
+                    #7db7ff var(--ratio, 0%),
+                    rgba(0, 0, 0, 0.42) var(--ratio, 0%),
+                    rgba(0, 0, 0, 0.42) 100%);
         }
 
+        // WebKit：可拖曳的圓形控制鈕
         &::-webkit-slider-thumb {
-            width: 40px;
-            height: 40px;
-            margin-top: -12px;
+
+            width: 24px; // 圓鈕變大
+            height: 24px;
+            margin-top: -7px; // 讓 24px 高的 thumb 垂直置中於 10px 高的 track：(10 - 24) / 2 = -7px
+
+            background: #7db7ff;
+            border: 2px solid rgba(255, 255, 255, 0.75);
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(125, 183, 255, 0.18);
 
             appearance: none;
             -webkit-appearance: none;
 
-            border: 0;
-            border-radius: 50%;
-            background: #8e8997;
+            transition: @slider-transition;
         }
 
-        // Firefox
-        &::-moz-range-track {
-            height: 16px;
-            border-radius: 999px;
-            background: #c8c8c8;
+        // hover 時讓圓鈕稍微變大
+        &:hover::-webkit-slider-thumb {
+            transform: scale(1.08);
         }
 
-        &::-moz-range-thumb {
-            width: 40px;
-            height: 40px;
-
-            border: 0;
-            border-radius: 50%;
-            background: #8e8997;
-        }
-
-        // 鍵盤操作時顯示焦點
-        &:focus-visible {
-            outline: 3px solid rgba(52, 120, 246, 0.3);
-            outline-offset: 4px;
+        // 滑桿 focus 時，強調控制鈕外圈
+        &:focus-visible::-webkit-slider-thumb {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 0 5px rgba(125, 183, 255, 0.4);
         }
     }
 }
 
-// 主要按鈕
-.primary-button {
-    display: block;
-    width: 100%;
-    height: 53px;
-    margin-top: 25px;
+/* 最下方「操作區」卡片 */
+.submit-container {
 
-    border: 0;
-    border-radius: 11px;
-    background: #3478f6;
+    min-height: 0; // 允許內容在小視窗時縮小，不撐破父層
 
-    color: #fff;
-    font-size: 16px;
-    font-weight: 800;
+    display: flex;
+    flex-direction: column; // 重要：讓內部可以用垂直方向的 flex 排版
+    flex: 1 1 0;
+}
+
+/* 撐滿 submit-container 內部可用高度 */
+.submit-card {
+    // 取得父層所有可用剩餘高度
+    flex: 1 1 0;
+
+    // 讓按鈕可沿垂直方向被推到底部
+    display: flex;
+    flex-direction: column;
+
+    min-height: 0;
+}
+
+/* 真正的按鈕 */
+.submit-action {
+
+    width: 100%; // 填滿容器寬度
+    min-height: 48px; // 視覺與可點擊區域
+    margin-top: auto; // 自動吃掉上方所有可用空間，按鈕因此貼近底部
+
+    // 文字
+    font: inherit;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+
+    // 藍色按鈕風格
+    background: rgba(125, 183, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: @border-radius;
 
     cursor: pointer;
 
-    &:hover:not(:disabled) {
-        background: #2469e8;
+    transition: @submit-transition;
+
+    &:hover {
+        background: rgba(125, 183, 255, 0.85);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
     }
 
-    &:disabled {
-        cursor: wait;
-        opacity: 0.55;
+    &:active {
+        transform: translateY(1px);
+    }
+
+    &:focus-visible {
+        outline: 3px solid rgba(255, 255, 255, 0.55);
+        outline-offset: 3px;
     }
 }
