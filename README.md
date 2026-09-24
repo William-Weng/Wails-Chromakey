@@ -13,7 +13,7 @@
 
 ## [操作介面](https://v3.wails.io/zh-tw/reference/cli/)
 
-https://github.com/user-attachments/assets/2c633051-4cb7-4c84-9af8-a4c0c1ad9584
+https://github.com/user-attachments/assets/12e90b7a-07fb-4eb2-ab8f-faddcd435319
 
 ## [功能特色](https://v3.wails.io/zh-tw/concepts/build-system/)
 
@@ -88,7 +88,7 @@ wails3 dev
 2. 輸入來源影片的絕對路徑。
 3. 調整取樣角落大小、容差與邊緣柔化參數。
 4. 確認顯示的 Key Color 是否正確。
-5. 按下「開始去背並輸出 PNG」。
+5. 按下「開始去背」。
 6. 等待處理完成並取得輸出檔案。
 
 ## 注意事項
