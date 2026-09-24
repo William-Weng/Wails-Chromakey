@@ -7,6 +7,8 @@ import (
 
 	_ "image/jpeg"
 	_ "image/png"
+
+	_ "golang.org/x/image/webp"
 )
 
 // 是提供給 Wails 前端呼叫的 Chroma Key 服務
