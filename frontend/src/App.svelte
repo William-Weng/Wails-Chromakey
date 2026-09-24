@@ -199,49 +199,6 @@
   }
 </script>
 
-<main class="page">
-  <section class="card" data-file-drop-target>
-    <label class="field">
-      <span>來源圖片絕對路徑</span>
-      <input bind:value={inputPath} placeholder="/Users/your_name/Desktop/images.jpg"/>
-    </label>
-
-    <section class="color-result">
-
-    <label class="swatch" style={`background-color: ${detectedColor.hex}`} aria-label="選擇 Key Color">
-        <input type="color" value={detectedColor.hex} on:change={handleColorChange} />
-    </label>
-
-      <div class="color-info">
-        <small>四角平均 Key Color</small>
-        <strong>{detectedColor.hex}</strong>
-        <span>
-          RGB({detectedColor.r}, {detectedColor.g}, {detectedColor.b})
-        </span>
-      </div>
-    </section>
-
-    <label class="slider-field">
-      <span>角落取樣大小：{sampleSize}px</span>
-      <input type="range" min="1" max="100" bind:value={sampleSize} />
-    </label>
-
-    <label class="slider-field">
-      <span>容差：{tolerance}</span>
-      <input type="range" min="0" max="220" bind:value={tolerance} />
-    </label>
-
-    <label class="slider-field">
-      <span>邊緣柔化：{softness}</span>
-      <input type="range" min="0" max="100" bind:value={softness} />
-    </label>
-
-    <button class="primary-button" type="button" disabled={processing || !detectedColor} on:click={processImage}>
-      {processing ? "處理中…" : "開始去背並輸出 PNG"}
-    </button>
-  </section>
-</main> -->
-
 <main class="fullscreen-bg" style="--background-url: url({backgroundUrl})">
   <section class="page" data-file-drop-target>
     <section class="card translucent">
