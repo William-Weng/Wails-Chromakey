@@ -10,7 +10,7 @@
   
   import { CornerColorFromFile, ProcessFile } from "../bindings/wails-chromakey/backend/ChromakeyService";
   
-  const backgroundUrl = "/bg-desktop.png";
+  const backgroundUrl = "/bg-desktop.jpg";
   const sampleSizeRange = { min: 1, max: 100, step: 1 }
   const toleranceRange = { min: 0, max: 100, step: 1 }
   const softnessRange = { min: 0, max: 100, step: 1 }

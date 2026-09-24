@@ -82,6 +82,12 @@ wails3 dev
 
 實際檔案結構可能會依照 Wails 3 專案配置有所不同。
 
+## 除錯
+
+- 在開發模式下，可以使用原系統的瀏覽器工具Debug。
+
+<img width="720" alt="Debug" src="https://github.com/user-attachments/assets/9159fac6-8f00-471b-8e5b-58a440577dfd" />
+
 ## 使用流程
 
 1. 開啟應用程式。
