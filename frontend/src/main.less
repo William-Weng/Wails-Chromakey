@@ -68,7 +68,7 @@ body {
     gap: 8px; // 兩個 card 之間的間距（可調）
 }
 
-/* 卡片外框比例 / 間距設定 */
+/* 卡片外框比例 + 間距設定 */
 .card {
 
     padding: @page-padding;
@@ -88,6 +88,24 @@ body {
     &:nth-child(4) {
         flex: 1 0 0;
     }
+}
+
+/* 自動去背時的背景色 */
+.is-auto {
+    background-color: #212122;
+}
+
+/* 自動去背透明按鈕 */
+.auto-process-button {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 /* 來源圖片路徑輸入框 */
@@ -299,7 +317,7 @@ body {
 
             width: @slider-thumb-size; // 圓鈕變大
             height: @slider-thumb-size;
-            margin-top: calc((@slider-track-size - @slider-thumb-size) / 2); // 讓 24px 高的 thumb 垂直置中於 10px 高的 track：(10 - 24) / 2 = -7px            
+            margin-top: calc((@slider-track-size - @slider-thumb-size) / 2); // 讓 24px 高的 thumb 垂直置中於 10px 高的 track：(10 - 24) / 2 = -7px
 
             background: #7db7ff;
             border: 2px solid rgba(255, 255, 255, 0.75);

@@ -7,30 +7,30 @@
   import { errorMessage } from "./utility/message";
   import { hexToRgb } from "./utility/string";
   import { chromaKeyOutputPath, fileNameFromPath } from "./utility/path";
-  
-  import { CornerColorFromFile, ProcessFile } from "../bindings/wails-chromakey/backend/ChromakeyService";
-  
+
+  import { CornerColorFromFile, ProcessFile } from "../bindings/wails-chromakey/backend/chromakeyservice";
+
   const backgroundUrl = "/bg-desktop.jpg";
   const sampleSizeRange = { min: 1, max: 100, step: 1 }
   const toleranceRange = { min: 0, max: 100, step: 1 }
   const softnessRange = { min: 0, max: 100, step: 1 }
 
-  let inputPath = "";
   let outputPath = "";
-
-  let processing = false;
-  let error = "";
   let statusText = "";
+  let error = "";
 
-  let sampleSize = 16;
-  let tolerance = 16;
-  let softness = 16;
-  
-  let detectedColor: ColorResult = { r: 0, g: 255, b: 0, hex: "#00FF00" };
+  let isProcessing = $state(false);
+  let isAutoProcessImage = $state(false);
+  let sampleSize = $state(16);
+  let tolerance = $state(16);
+  let softness = $state(16);
+  let inputPath = $state("")
 
-  $: sampleSizeRatio = ((sampleSize - sampleSizeRange.min) / (sampleSizeRange.max - sampleSizeRange.min)) * 100;
-  $: toleranceRatio = ((tolerance - toleranceRange.min) / (toleranceRange.max - toleranceRange.min)) * 100;
-  $: softnessRatio = ((softness - softnessRange.min) / (softnessRange.max - softnessRange.min)) * 100;
+  let detectedColor: ColorResult = $state({ r: 0, g: 255, b: 0, hex: "#00FF00" });
+
+  let sampleSizeRatio = $derived(((sampleSize - sampleSizeRange.min) / (sampleSizeRange.max - sampleSizeRange.min)) * 100);
+  let toleranceRatio = $derived(((tolerance - toleranceRange.min) / (toleranceRange.max - toleranceRange.min)) * 100);
+  let softnessRatio = $derived(((softness - softnessRange.min) / (softnessRange.max - softnessRange.min)) * 100);
 
   onMount(() => {
     const unsubscribeDrop = Events.On("image-file-dropped", (event) => {
@@ -63,7 +63,7 @@
    * @param event - Wails Events.On() callback 收到的事件物件或 payload
    */
   async function imageFileDroppedAction(event: unknown): Promise<void> {
-    
+
     const files = eventData<string[]>(event);
 
     if (!Array.isArray(files) || files.length === 0) {
@@ -119,7 +119,7 @@
       return;
     }
 
-    processing = true;
+    isProcessing = true;
     error = "";
     statusText = "正在去背…";
 
@@ -134,13 +134,13 @@
     try {
       await ProcessFile(source, destination, params);
       statusText = "去背完成";
-      await dialog("info", statusText, `已輸出 PNG：\n${fileNameFromPath(destination)}`);
+      isProcessing = false;
+      if (!isAutoProcessImage) { await dialog("info", statusText, `已輸出 PNG：\n${fileNameFromPath(destination)}`); }
     } catch (err) {
       error = err instanceof Error ? err.message : String(err);
       statusText = "去背失敗";
+      isProcessing = false;
       await dialog("error", statusText, error);
-    } finally {
-      processing = false;
     }
   }
 
@@ -166,19 +166,20 @@
       return;
     }
 
-    processing = true;
+    isProcessing = true;
     error = "";
     statusText = "正在偵測背景色…";
 
     try {
       detectedColor = await CornerColorFromFile(path, sampleSize);
       statusText = "背景色偵測完成";
+      if (isAutoProcessImage) { await processImage() }
     } catch (err) {
       error = errorMessage(err);
       statusText = "背景色偵測失敗";
       await dialog("error", statusText, error);
     } finally {
-      processing = false;
+      isProcessing = false;
     }
   }
 
@@ -188,7 +189,7 @@
    * 使用者從調色盤選擇顏色後，會執行這個函式，並同步更新 detectedColor 的 HEX 與 RGB 值
    *
    * @param event color input 的 change 事件
-   */ 
+   */
   function handleColorChange(event: Event) {
 
     const input = event.currentTarget as HTMLInputElement;
@@ -196,6 +197,11 @@
     const rgb = hexToRgb(hex);
 
     detectedColor = { hex,...rgb };
+  }
+
+  // 切換是否啟用自動圖片處理
+  function handleAutoProcessImage() {
+    isAutoProcessImage = !isAutoProcessImage
   }
 </script>
 
@@ -207,17 +213,19 @@
         <input id="source-image-path" type="text" bind:value={inputPath} placeholder="/Users/<YourName>/Desktop/images.jpg" />
       </section>
     </section>
-    <section class="card translucent">
-      <div class="key-color">
-        <div class="color-swatch" style="--chroma-color: {detectedColor.hex}" aria-hidden="true">
-          <input type="color" value={detectedColor.hex} on:change={handleColorChange}/>
+    <section class="card translucent" class:is-auto={isAutoProcessImage}>
+        <!-- 底層按鈕：絕對定位，撐滿整個 section -->
+        <button class="auto-process-button" onclick={handleAutoProcessImage} aria-label="true"></button>
+        <div class="key-color">
+            <div class="color-swatch" style="--chroma-color: {detectedColor.hex}" aria-hidden="true">
+            <input type="color" value={detectedColor.hex} onchange={handleColorChange} />
+            </div>
+            <div class="key-color-code">
+            <div class="color-label">四角平均色</div>
+            <div class="color-label-hex">{detectedColor.hex}</div>
+            <div class="color-label-rgb">RGB({detectedColor.r},{detectedColor.g},{detectedColor.b})</div>
+            </div>
         </div>
-        <div class="key-color-code">
-          <div class="color-label">四角平均色</div>
-          <div class="color-label-hex">{detectedColor.hex}</div>
-          <div class="color-label-rgb">RGB({detectedColor.r},{detectedColor.g},{detectedColor.b})</div>
-        </div>
-      </div>
     </section>
     <section class="card translucent">
       <div class="input-sliders">
@@ -245,7 +253,7 @@
       </div>
     </section>
     <section class="submit-container">
-      <input class="submit-action" type="button" value={processing ? "處理中…" : "開始去背"} disabled={processing || !detectedColor} on:click={processImage}/>
+      <input class="submit-action" type="button" value={isProcessing ? "處理中…" : "開始去背"} disabled={isProcessing || !detectedColor} onclick={processImage}/>
     </section>
   </section>
 </main>

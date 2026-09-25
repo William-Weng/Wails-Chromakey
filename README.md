@@ -66,8 +66,10 @@ wails3 dev
 | 建立新專案 | `wails3 init -n <專案名稱> -t <前端框架>` |
 | 產生 bindings | `wails3 generate bindings` |
 | 更新建置資源 | `wails3 task common:update:build-assets` |
+| 拉取（下載）用於跨平台交叉編譯的 Docker 映像檔 | `wails3 task setup:docker` |
 | 建置 Windows x64 | `wails3 build GOOS=windows GOARCH=amd64` |
 | 打包 macOS arm64 | `wails3 package GOOS=darwin GOARCH=arm64` |
+| 打包 Linux arm64 | `wails3 build GOOS=linux GOARCH=arm64` |
 
 ## 專案結構
 
@@ -103,4 +105,3 @@ wails3 dev
 - 背景若存在陰影、反光或顏色不均，可能需要調整容差與邊緣柔化參數。
 - 輸入路徑必須是應用程式執行環境可以存取的檔案路徑。
 - 跨平台建置時，請確認目標平台的 Go、Wails 3 與相關建置工具已正確設定。
-
